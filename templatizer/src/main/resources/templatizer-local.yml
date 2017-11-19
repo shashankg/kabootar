@@ -1,0 +1,35 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  minThreads: 100
+  maxThreads: 100
+  connector:
+    port: 18000
+    type: http
+
+logging:
+  level: INFO
+  loggers:
+      org.hibernate: ERROR
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      logFormat: "templatizer %d [%thread] %-5level %c{15} - [%X{X-Transaction-Key} - %X{X-Request-Key}] - %msg%n%rEx"
+
+database:
+  driverClass: com.mysql.jdbc.Driver
+  user: root
+  password:
+  url: jdbc:mysql://localhost:3306/templatizer?autoReconnect=true
+  maxWaitForConnection: 1s
+  validationQuery: "SELECT 1"
+  minSize: 8
+  maxSize: 32
+  checkConnectionWhileIdle: false
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.MySQLDialect
+    hibernate.hbm2ddl.auto: update
+    hibernate.show_sql: false
