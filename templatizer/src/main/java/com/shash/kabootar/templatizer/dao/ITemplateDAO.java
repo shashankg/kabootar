@@ -20,10 +20,11 @@ public interface ITemplateDAO {
     /**
      * Get Template.
      *
-     * @param id ::
+     * @param tenant ::
+     * @param name   ::
      * @return Template
      */
-    Template get(final Long id);
+    Template get(final String tenant, final String name);
 
     /**
      * Soft delete Template.
@@ -53,5 +54,5 @@ public interface ITemplateDAO {
      *
      * @param Template ::
      */
-    void modify(final Template Template);
+    void update(final Template Template);
 }

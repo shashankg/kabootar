@@ -15,7 +15,7 @@ public class BaseDomain {
     @Id
     @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Getter
     @Setter

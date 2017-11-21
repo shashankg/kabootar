@@ -1,7 +1,6 @@
 package com.shash.kabootar.templatizer.resource;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 import com.shash.kabootar.commons.filter.UserRequired;
 import com.shash.kabootar.templatizer.domain.Template;
 import com.shash.kabootar.templatizer.service.ITemplatizerService;
@@ -38,9 +37,49 @@ public class TemplatizerResource {
     @GET
     @Timed
     @UnitOfWork(transactional = false)
-    @Path("{id}")
-    public Response get(@PathParam("id") final long id) {
-        final Template template = service.getById(id);
+    @Path("{tenant}/{name}")
+    public Response get(@PathParam("tenant") final String tenant, @PathParam("name") final String name) {
+        final Template template = service.get(tenant, name);
         return Response.ok().entity(template).build();
+    }
+
+    @PUT
+    @Timed
+    @UnitOfWork(transactional = true)
+    @Path("{tenant}/{name}")
+    @UserRequired
+    public Response update(@PathParam("tenant") final String tenant, @PathParam("name") final String name, final Template template) {
+        service.update(tenant, name, template);
+        return Response.noContent().build();
+    }
+
+    @PUT
+    @Timed
+    @UnitOfWork(transactional = true)
+    @Path("{tenant}/{name}/publish")
+    @UserRequired
+    public Response publish(@PathParam("tenant") final String tenant, @PathParam("name") final String name) {
+        service.publish(tenant, name);
+        return Response.noContent().build();
+    }
+
+    @PUT
+    @Timed
+    @UnitOfWork(transactional = true)
+    @Path("{tenant}/{name}/unpublish")
+    @UserRequired
+    public Response unpublish(@PathParam("tenant") final String tenant, @PathParam("name") final String name) {
+        service.unpublish(tenant, name);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Timed
+    @UnitOfWork(transactional = true)
+    @Path("{tenant}/{name}")
+    @UserRequired
+    public Response delete(@PathParam("tenant") final String tenant, @PathParam("name") final String name) {
+        service.delete(tenant, name);
+        return Response.noContent().build();
     }
 }

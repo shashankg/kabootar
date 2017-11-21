@@ -12,6 +12,7 @@
     <modules>
         <module>templatizer</module>
         <module>commons</module>
+        <module>kabootar-baaz</module>
     </modules>
 
     <properties>

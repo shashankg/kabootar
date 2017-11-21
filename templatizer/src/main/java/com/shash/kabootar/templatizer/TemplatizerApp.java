@@ -1,8 +1,20 @@
 package com.shash.kabootar.templatizer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.MustacheFactory;
+import com.shash.kabootar.commons.dropwizard.RuntimeExceptionMapper;
+import com.shash.kabootar.commons.exception.ResourceNotFoundException;
+import com.shash.kabootar.commons.exception.UnProcessableException;
+import com.shash.kabootar.commons.filter.UserFilter;
+import com.shash.kabootar.templatizer.dao.ITemplateDAO;
+import com.shash.kabootar.templatizer.dao.impl.TemplateDAO;
+import com.shash.kabootar.templatizer.domain.Template;
+import com.shash.kabootar.templatizer.resource.TemplatizerResource;
+import com.shash.kabootar.templatizer.service.impl.TemplatizerServiceImpl;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.ScanningHibernateBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -16,15 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 public class TemplatizerApp extends Application<TemplatizerConfig> {
 
     public static final String APP_NAME = "kabootar-templatizer";
-    public static final String HIBERNATE_PKG = "com.shash.templatizer.domain";
 
     /*
     * Hibernate bundle
     */
-    private final HibernateBundle<TemplatizerConfig> hibernate = new ScanningHibernateBundle<TemplatizerConfig>(HIBERNATE_PKG) {
+    private final HibernateBundle<TemplatizerConfig> hibernate = new HibernateBundle<TemplatizerConfig>(Template.class) {
         @Override
-        public DataSourceFactory getDataSourceFactory(final TemplatizerConfig configuration) {
-            return configuration.getDatabase();
+        public PooledDataSourceFactory getDataSourceFactory(final TemplatizerConfig templatizerConfig) {
+            return templatizerConfig.getDatabase();
         }
     };
 
@@ -39,13 +50,12 @@ public class TemplatizerApp extends Application<TemplatizerConfig> {
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        /*
-         * Register managed, resources, exception mapper, filters
-         */
-        /*environment.lifecycle().manage(openTsdb);
-        environment.jersey().register(componentResource);
+        final ITemplateDAO dao = new TemplateDAO(hibernate.getSessionFactory());
+        final MustacheFactory factory = new DefaultMustacheFactory();
+
+        environment.jersey().register(new TemplatizerResource(new TemplatizerServiceImpl(factory, dao)));
         environment.jersey().register(RuntimeExceptionMapper.class);
-        environment.jersey().register(UserFilter.class);*/
+        environment.jersey().register(UserFilter.class);
     }
 
     /**

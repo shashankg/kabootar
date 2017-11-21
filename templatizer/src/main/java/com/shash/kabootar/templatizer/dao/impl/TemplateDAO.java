@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.shash.kabootar.commons.dropwizard.BaseDAO;
 import com.shash.kabootar.templatizer.dao.ITemplateDAO;
 import com.shash.kabootar.templatizer.domain.Template;
+import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,10 +16,15 @@ import java.util.Set;
 /**
  * @author shashankgautam
  */
-public class TemplateDAO extends BaseDAO<Template> implements ITemplateDAO {
+public class TemplateDAO extends AbstractDAO<Template> implements ITemplateDAO {
 
     private final SessionFactory sessionFactory;
 
+    /**
+     * Constructor
+     *
+     * @param sessionFactory ::
+     */
     public TemplateDAO(final SessionFactory sessionFactory) {
         super(sessionFactory);
         this.sessionFactory = sessionFactory;
@@ -27,24 +33,27 @@ public class TemplateDAO extends BaseDAO<Template> implements ITemplateDAO {
     @Override
     public Template save(final Template template) {
         template.setDeleted(false);
+        template.prePersist();
         return super.persist(template);
     }
 
     @Override
-    public Template get(final Long id) {
-        return super.get(id);
+    public Template get(final String tenant, final String name) {
+        return super.get(Template.createId(tenant, name));
     }
 
     @Override
     public void delete(final Template template) {
         template.setDeleted(true);
-        super.update(template);
+        template.preUpdate();
+        super.persist(template);
     }
 
     @Override
     public void revive(final Template template) {
         template.setDeleted(false);
-        super.update(template);
+        template.preUpdate();
+        super.persist(template);
     }
 
     @Override
@@ -63,8 +72,9 @@ public class TemplateDAO extends BaseDAO<Template> implements ITemplateDAO {
     }
 
     @Override
-    public void modify(final Template template) {
-        super.update(template);
+    public void update(final Template template) {
+        template.preUpdate();
+        super.persist(template);
         template.setVersion(template.getVersion() + 1);
     }
 
